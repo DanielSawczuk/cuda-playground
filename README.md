@@ -8,3 +8,8 @@ conda env create --file environment.yml
 conda activate cuda
 python example.py
 ```
+
+Profiling
+```
+sudo -E bash -c "PATH=/usr/local/cuda-12.3/bin:$PATH /opt/nvidia/nsight-compute/2023.3.1/target/linux-desktop-glibc_2_11_3-x64/ncu --config-file off --export prof_log --force-overwrite /home/${USER}/miniforge3/envs/cuda/bin/python example.py"
+```
