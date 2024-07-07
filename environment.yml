@@ -7,3 +7,4 @@ dependencies:
   - pip:
       - pycuda==2024.1
       - numpy==1.26.4
+      - black
