@@ -6,13 +6,14 @@ import math
 from pycuda.compiler import SourceModule
 
 with open("matmul.cu") as src_fp:
-    # wmma functions are templated so to use them we need `no_extern_c=True`
-    # (pycuda wraps the whole kernel code (including includes) with `extern C` by defualt)
+    # pycuda wraps the whole kernel code (including includes) with `extern "C"` by defualt,
+    # it causes problems if included headers contain templated functions (e.g. mma.h),
+    # that's why `not_extern_c` needs to be set to `True`,
+    # and to avoid dealing with C++ mangled function names,
+    # `extern "C"` is added manually only to the __global__ function
     mod = SourceModule(src_fp.read(), no_extern_c=True)  # , options=["-DDEBUG"])
 
-# because of `no_extern_c=True` we need C++ mangled function name
-# (tip: compile kernel to PTX to check how it should look like)
-multiply_them = mod.get_function("_Z6matmulP6__halfS0_Pfiii")
+multiply_them = mod.get_function("matmul")
 
 M = 64
 K = 128

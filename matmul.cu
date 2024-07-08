@@ -6,6 +6,7 @@ const int WMMA_M = 16;
 const int WMMA_N = 16;
 const int WMMA_K = 16;
 
+extern "C"
 __global__ void matmul(half *a, half *b, float *c, int M, int K, int N)
 {
     int lda = K;
