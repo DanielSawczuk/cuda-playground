@@ -1,3 +1,5 @@
+#include "cuda_intellisense.hpp"
+
 #include <mma.h>
 using namespace nvcuda;
 

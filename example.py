@@ -1,3 +1,5 @@
+import os
+
 import pycuda.autoinit
 import pycuda.driver as drv
 import numpy as np
@@ -11,7 +13,11 @@ with open("matmul.cu") as src_fp:
     # that's why `not_extern_c` needs to be set to `True`,
     # and to avoid dealing with C++ mangled function names,
     # `extern "C"` is added manually only to the __global__ function
-    mod = SourceModule(src_fp.read(), no_extern_c=True)  # , options=["-DDEBUG"])
+    mod = SourceModule(
+        src_fp.read(),
+        no_extern_c=True,
+        include_dirs=[os.path.abspath("./device_utils")],
+    )  # , options=["-DDEBUG"])
 
 multiply_them = mod.get_function("matmul")
 
