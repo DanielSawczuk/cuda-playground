@@ -1,20 +1,52 @@
 # cuda-playground
 
+## Set up CUDA environment
 ```
-export CPATH=/usr/local/cuda-12.3/targets/x86_64-linux/include:$CPATH
-export LIBRARY_PATH=/usr/local/cuda-12.3/lib64:/usr/local/cuda-12.3/targets/x86_64-linux/lib/stubs/:$LIBRARY_PATH
-export PATH=/usr/local/cuda-12.3/bin:$PATH
+export CUDA_TOOLKIT_PATH=/usr/local/cuda-12.3/
+export PATH=$CUDA_TOOLKIT_PATH/bin:$PATH
+export CPATH=$CUDA_TOOLKIT_PATH/include:$CPATH
+```
+
+## Python (pycuda) example
+```
 conda env create --file environment.yml
 conda activate cuda
 python example.py
 ```
 
-Profiling
+## Cpp example
+#### Compile
 ```
-sudo -E bash -c "PATH=/usr/local/cuda-12.3/bin:$PATH /opt/nvidia/nsight-compute/2023.3.1/target/linux-desktop-glibc_2_11_3-x64/ncu --config-file off --export prof_log --force-overwrite /home/${USER}/miniforge3/envs/cuda/bin/python example.py"
+mkdir build && cd build
+cmake .. -DCMAKE_CUDA_ARCHITECTURES=86-virtual && make -j
 ```
 
-Dump PTX
+#### Run
 ```
-nvcc --ptx -arch sm_86 -I/home/sdaniel/miniforge3/envs/cuda/lib/python3.12/site-packages/pycuda/cuda matmul.cu 
+src/gemm_example src/kernels/gemm_fma.ptx
+```
+
+## Misc
+#### Set up pre-coomit hook for clang-format and black formatting
+```
+ln tools/hooks/format.hook .git/hooks/pre-commit
+```
+
+#### Dumping PTX
+```
+nvcc --ptx -arch sm_86 -Iinclude/tools src/kernels/gemm_fma.cu
+```
+
+
+#### Profiling
+```
+export CUDA_NCU_DIR=/usr/local/NVIDIA-Nsight-Compute/
+```
+Python
+```
+sudo -E bash -c "PATH=$CUDA_TOOLKIT_PATH/bin:$PATH $CUDA_NCU_DIR/ncu --config-file off --export prof_log --set full --force-overwrite python example.py"
+```
+Cpp
+```
+sudo -E bash -c "PATH=$CUDA_TOOLKIT_PATH/bin:$PATH $CUDA_NCU_DIR/ncu --config-file off --export prof_log --set full --force-overwrite build/src/gemm_example build/src/kernels/gemm_fma.ptx"
 ```

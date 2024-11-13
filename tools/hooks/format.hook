@@ -1,0 +1,23 @@
+#!/bin/bash
+
+echo "[pre-commit hook] Running clang-format on staged files"
+files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(c|cpp|h|hpp|cu|cuh)$')
+repo_root=$(git rev-parse --show-toplevel)
+for file in $files; do
+    if [ -f $file ]; then
+        echo "[pre-commit hook] Running clang-format on: $file"
+        clang-format -i -style=file:${repo_root}/tools/hooks/.clang-format "$file" || exit 1
+        git add "$file"
+    fi
+done
+
+
+echo "[pre-commit hook] Running black on staged files"
+files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(py)$')
+for file in $files; do
+    if [ -f $file ]; then
+        echo "[pre-commit hook] Running black on: $file"
+        black "$file" --preview || exit 1
+        git add "$file"
+    fi
+done

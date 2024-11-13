@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import pycuda.autoinit
 import pycuda.driver as drv
@@ -7,8 +8,11 @@ import math
 
 from pycuda.compiler import SourceModule
 
-with open("matmul.cu") as src_fp:
-    # pycuda wraps the whole kernel code (including includes) with `extern "C"` by defualt,
+kernel_file = Path(".") / "src" / "kernels" / "gemm_wmma.cu"
+include_dir = Path(".") / "include" / "tools"
+
+with kernel_file.open() as src_fp:
+    # pycuda wraps the whole kernel code (including includes) with `extern "C"` by default,
     # it causes problems if included headers contain templated functions (e.g. mma.h),
     # that's why `not_extern_c` needs to be set to `True`,
     # and to avoid dealing with C++ mangled function names,
@@ -16,10 +20,10 @@ with open("matmul.cu") as src_fp:
     mod = SourceModule(
         src_fp.read(),
         no_extern_c=True,
-        include_dirs=[os.path.abspath("./device_utils")],
+        include_dirs=[str(include_dir.resolve())],
     )  # , options=["-DDEBUG"])
 
-multiply_them = mod.get_function("matmul")
+multiply_them = mod.get_function("gemm")
 
 M = 64
 K = 128
